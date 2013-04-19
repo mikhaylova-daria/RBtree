@@ -17,7 +17,7 @@ class RBtree
         Node(){;}
         Node (T _key): key(_key) {;}
         Node (Node * _root): colour(true),left(_root), right(_root) {;}     //для NIL
-       // Node (Node const & _nd):left(_nd.left), right(_nd.right), key(_nd.key), parent(_nd.parent), color(_nd.color){;} // для копирования
+        // Node (Node const & _nd):left(_nd.left), right(_nd.right), key(_nd.key), parent(_nd.parent), color(_nd.color){;} // для копирования
         ~Node(){;}
 
         bool is_NIL(RBtree * tree){
@@ -67,6 +67,7 @@ template <typename T>
 template <typename T>
     void RBtree<T>::deleting (T _key){
         Node * key = (Node*) (this->TreeSearch(root, _key));
+        if (key ->is_NIL(this)) return;
         this->RB_DELETE(key);
         delete (key);
         return;
@@ -216,18 +217,18 @@ template <typename T>
         void * RBtree<T>::RB_DELETE (RBtree<T>::Node * z) {
         Node * y;
         Node * x;
-        if (z->left->is_NIL() || z->right->is_NIL()) {
+        if (z->left->is_NIL(this) || z->right->is_NIL(this)) {
             y = z;
         } else {
-            y = (Node*)TreeSuccessor (z);
+            y = (Node*)TreeSuccessor(z);
         }
-        if (!(y->left->is_NIL())) {
+        if (!(y->left->is_NIL(this))) {
             x = y->left;
         } else {
             x = y->right;
         }
         x->parent = y->parent;
-        if (y->right->is_NIL()) {
+        if (y->parent->is_NIL(this)) {
             root = x;
         } else {
             if (y == y ->parent->left) {
@@ -254,7 +255,7 @@ template <typename T >
             w = x->parent ->right;
             if (w->colour == false) {
                 w->colour = true;
-                x->parent = false;
+                x->parent -> colour= false;
                 LEFT_ROTATE(x->parent);
                 w = x->parent->right;
             }
@@ -278,8 +279,8 @@ template <typename T >
             w = x->parent ->left;
             if (w->colour == false) {
                 w->colour = true;
-                x->parent = false;
-                LEFT_ROTATE(x->parent);
+                x->parent->colour = false;
+                RIGHT_ROTATE(x->parent);
                 w = x->parent->left;
             }
             if ((w->right->colour == true) && (w->left->colour == true)) {
