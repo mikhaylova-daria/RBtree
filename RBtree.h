@@ -11,10 +11,11 @@ class RBtree
         Node * left;
         Node * right;
         Node * parent;
-        Node(){}
+        Node(){;}
         Node (T _key): key(_key) {;}
         Node (Node * _root): left(_root), right(_root), color(true) {;}     //для NIL
         Node (Node const & _nd):left(_nd.left), right(_nd.right), key(_nd.key), parent(_nd.parent), color(true){;} // для копирования
+        ~Node(){;}
 
         bool is_NIL() {
             if (this -> left == root ) {
@@ -31,20 +32,27 @@ class RBtree
 public:
     RBtree() {;}
     ~RBtree() {;}
+private:
     void LEFT_ROTATE (Node *);
     void RIGHT_ROTATE (Node *);
-    Node * RB_INSERT (Node *);
+    void RB_INSERT (Node *);
     void RB_INSERT_FIXUP (Node *);
-    void RB_DELETE (Node *);
+    void * RB_DELETE (Node *);
     void RB_DELETE_FIXUP (Node *);
-    Node * TreeSuccessor(Node *);
-    Node * TreePredecessor(Node *);
-    Node * TreeMinimum (Node * x);
-    Node * TreeMaximum (Node *x);
-    Node * TreeSearch (Node * x = root, T key);
+    void * TreeSuccessor(Node *);
+    void * TreePredecessor(Node *);
+    void * TreeMinimum (Node * x);
+    void * TreeMaximum (Node *x);
+    void * TreeSearch (Node * x , T key);
+public:
+    void insert(T key);
+    void deleting (T key);
+    bool has_key (T key);
+};
 
 
-    void LEFT_ROTATE (Node * x) {
+template <typename T >
+    void RBtree<T>::LEFT_ROTATE (RBtree<T>::Node * x) {
        Node* y = x->right; //определили, с кем меняем (у был ниже х - у "поднимается")
        x->right = y->left; // х отказывается от сына х и вместо усыновил внука, левого потомка y
        if(!y->left->is_null()) { //если внук "реальный", то он признаёт в х родителя
@@ -66,8 +74,8 @@ public:
        return;
     }
 
-
-    void RIGHT_ROTATE (Node * x) {
+template <typename T >
+    void RBtree<T>::RIGHT_ROTATE (RBtree<T>::Node * x) {
        Node* y = x->left; //у - снизу справа, определили будущего бунтовщика
        x->left = y->right;  // внезапно и безпричинно х отказывается от сына: теперь х считает своим левым потомком не у, а у.right
                                 //выкинули y и всех его левых последователей из родословного древа
@@ -89,8 +97,8 @@ public:
        return; //конец
     }
 
-
-    void RB_INSERT(Node * z) { //вставка z (по указателю !!!)
+template <typename T >
+    void RBtree<T>::RB_INSERT(RBtree<T>::Node * z) { //вставка z (по указателю !!!)
         Node y (NIL);     //двойник универсальный (далее шут)
         Node x (*root);   //двойник корня (далее экс - режисёр )
         while (! x.is_NIL()){ //до тех пор пока экс - режисёр не выживет из ума
@@ -120,8 +128,8 @@ public:
     }
 
 
-
-    void RB_INSERT_FIXUP (Node * z) {
+template <typename T >
+    void RBtree<T>::RB_INSERT_FIXUP (RBtree<T>::Node * z) {
         Node* y;
         while (((z->parent) -> color) == false) { // пока не исправим нарушение свойства RBtree, из-за того, что отец красного z - сам красный
             if (z->parent == (((z->parent)->parent) ->left)) { // определили дядю z
@@ -163,13 +171,15 @@ public:
         return;
     }
 
-    Node * RB_DELETE (Node * z) {
+
+template <typename T>
+        void * RBtree<T>::RB_DELETE (RBtree<T>::Node * z) {
         Node * y;
         Node * x;
         if (z->left->is_NIL() || z->right->is_NIL()) {
             y = z;
         } else {
-            y = TreeSuccessor (z);
+            y = (Node*)TreeSuccessor (z);
         }
         if (!(y->left->is_NIL())) {
             x = y->left;
@@ -192,9 +202,12 @@ public:
         if (y->color == true) {
             RB_DELETE_FIXUP(x);
         }
-        return y;
+        return (void*)y;
     }
-    void RB_DELETE_FIXUP (Node * x) {
+
+
+template <typename T >
+    void RBtree<T>::RB_DELETE_FIXUP (RBtree<T>::Node * x) {
         Node * w;
         while ((x != root) && (x->color == true));
         if (x == x->parent->left) {
@@ -249,7 +262,9 @@ public:
         x->color = true;
     }
 
-    Node * TreeSuccessor(Node * x) {
+
+template <typename T >
+    void* RBtree<T>::TreeSuccessor(Node * x) {
         if (!(x->right->is_NIL())) {
             return TreeMinimum(x->right);
         }
@@ -258,11 +273,11 @@ public:
             x = y;
             y = y->parent;
         }
-        return y;
+        return (void*)y;
     }
 
-
-    Node * TreePredecessor(Node * x) {
+template <typename T >
+   void * RBtree<T>::TreePredecessor(RBtree<T>::Node * x) {
         if (!(x->left->is_NIL())) {
             return TreeMaximum(x->left);
         }
@@ -271,25 +286,27 @@ public:
             x = y;
             y = y->parent;
         }
-        return y;
+        return (void*)y;
     }
 
-
-    Node * TreeMinimum (Node * x) {
+template <typename T >
+    void* RBtree<T>::TreeMinimum (RBtree<T>::Node * x) {
         while (!(x->left->is_NIL())) {
             x = x->left;
         }
-        return x;
+        return (void *)x;
     }
 
-    Node * TreeMaximum (Node *x) {
+template <typename T >
+    void * RBtree<T>::TreeMaximum (RBtree<T>::Node *x) {
         while (!(x->right->is_NIL())) {
                x = x->right;
         }
-        return x;
+        return (void *)x;
     }
 
-    Node * TreeSearch (Node * x = root, T key){
+template <typename T >
+    void * RBtree<T>::TreeSearch (RBtree<T>::Node * x, T key){
         while  (!(x->is_NIL()) && key != (x->key)) {
             if (key < x->key) {
                    x = x->left;
@@ -297,12 +314,11 @@ public:
                 x = x->right;
             }
         }
-        return x;
+        return (void *)x;
     }
 
 
 
-};
 
 
 
