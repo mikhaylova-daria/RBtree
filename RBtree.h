@@ -38,6 +38,11 @@ public:
     void RB_DELETE (Node *);
     void RB_DELETE_FIXUP (Node *);
     Node * TreeSuccessor(Node *);
+    Node * TreePredecessor(Node *);
+    Node * TreeMinimum (Node * x);
+    Node * TreeMaximum (Node *x);
+    Node * TreeSearch (Node * x = root, T key);
+
 
     void LEFT_ROTATE (Node * x) {
        Node* y = x->right; //определили, с кем меняем (у был ниже х - у "поднимается")
@@ -243,6 +248,59 @@ public:
         }
         x->color = true;
     }
+
+    Node * TreeSuccessor(Node * x) {
+        if (!(x->right->is_NIL())) {
+            return TreeMinimum(x->right);
+        }
+        Node * y = x->parent;
+        while (!(y->is_NIL()) && x == y->right) {
+            x = y;
+            y = y->parent;
+        }
+        return y;
+    }
+
+
+    Node * TreePredecessor(Node * x) {
+        if (!(x->left->is_NIL())) {
+            return TreeMaximum(x->left);
+        }
+        Node * y = x->parent;
+        while (!(y->is_NIL()) && x == y->left) {
+            x = y;
+            y = y->parent;
+        }
+        return y;
+    }
+
+
+    Node * TreeMinimum (Node * x) {
+        while (!(x->left->is_NIL())) {
+            x = x->left;
+        }
+        return x;
+    }
+
+    Node * TreeMaximum (Node *x) {
+        while (!(x->right->is_NIL())) {
+               x = x->right;
+        }
+        return x;
+    }
+
+    Node * TreeSearch (Node * x = root, T key){
+        while  (!(x->is_NIL()) && key != (x->key)) {
+            if (key < x->key) {
+                   x = x->left;
+            } else {
+                x = x->right;
+            }
+        }
+        return x;
+    }
+
+
 
 };
 
