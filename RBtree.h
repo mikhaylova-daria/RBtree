@@ -116,40 +116,40 @@ public:
 
 
     void RB_INSERT_FIXUP (Node * z) {
-        Node y;
-        while (((z->parent) -> color) == false) {
-            if (z->parent == (((z->parent)->parent) ->left)) { //если родитель z является левым потомком
-                y = *(((z->parent)->parent) -> right);
-                if (y.color == false){                  // случай, когда дядя z красный
+        Node* y;
+        while (((z->parent) -> color) == false) { // пока не исправим нарушение свойства RBtree, из-за того, что отец красного z - сам красный
+            if (z->parent == (((z->parent)->parent) ->left)) { // определили дядю z
+                y = ((z->parent)->parent) -> right;
+                if (y.color == false){                  // если он тоже красный, делаем их с отцом чёрными, а деда красным
                     z->parent->color = true;
                     y.color  = true;
                     z->parent->parent->color = false;
-                    z = z->parent->parent;
-                } else {
-                    if (z == z->parent ->right) { //если z правый потомок
-                       z = z->parent;
-                       LEFT_ROTATE(z);
+                    z = z->parent->parent;      // теперь проблемы с дедом - исправим в след итерации
+                } else {    //если дядя чёрный
+                    if (z == z->parent -> right) { //если z(Б) - правый потомок, он "свергает" своего отца (А) левым поворотом,
+                       z = z->parent; //переименовался в родителя
+                       LEFT_ROTATE(z); //теперь старый z родитель нового (теперь А под Б)
                     }
-                    z -> p->color = true;
-                    z->parent->parent->color = false;
-                    RIGHT_ROTATE(z->parent->parent);
+                    z -> p -> color = true; // если были в if: затем родитель z ( Б теперь чёрный) становится чёрным ()
+                    z->parent->parent->color = false; // С, старого деда Б - его нынешенего отца сделали красным
+                    RIGHT_ROTATE(z->parent->parent); // Б сверг С правым поворотом
                 }
             } else {
-                if (z->parent == (((z->parent)->parent) ->right)) { //если родитель z является левым потомком
-                    y = *(((z->parent)->parent) -> left);
+                if (z->parent == (((z->parent)->parent) ->right)) { //нашли дядю
+                    y = ((z->parent)->parent) -> left;
                     if (y.color == false){                  // случай, когда дядя z красный
                         z->parent->color = true;
-                        y.color  = true;
+                        y.color = true;
                         z->parent->parent->color = false;
                         z = z->parent->parent;
-                    } else {
-                        if (z == z->parent -> left) { //если z правый потомок
+                    } else {            //если дядя чёрный
+                        if (z == z->parent -> left) { //если z (В)  - левый потомок, он свергает своего отца (А) Правым поворотом
                            z = z->parent;
-                           RIGHT_ROTATE(z); //??
+                           RIGHT_ROTATE(z);
                         }
                         z -> p->color = true;
                         z->parent->parent->color = false;
-                        LEFT_ROTATE(z->parent->parent); //???
+                        LEFT_ROTATE(z->parent->parent); //дед свергается правым потомком
                     }
                 }
             }
