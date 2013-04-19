@@ -14,11 +14,11 @@ class RBtree
         Node(){;}
         Node (T _key): key(_key) {;}
         Node (Node * _root): left(_root), right(_root), color(true) {;}     //для NIL
-        Node (Node const & _nd):left(_nd.left), right(_nd.right), key(_nd.key), parent(_nd.parent), color(true){;} // для копирования
+       // Node (Node const & _nd):left(_nd.left), right(_nd.right), key(_nd.key), parent(_nd.parent), color(_nd.color){;} // для копирования
         ~Node(){;}
 
         bool is_NIL() {
-            if (this -> left == root ) {
+            if ((this -> left == root) && (this->right == root)) {
                 return true;
             } else {
                 return false;
@@ -30,8 +30,13 @@ class RBtree
 
 
 public:
-    RBtree() {;}
-    ~RBtree() {;}
+    RBtree() {
+        NIL.left = &NIL;
+        NIL.right = &NIL;
+        NIL.color = true;
+        root = &NIL;
+    }
+    ~RBtree() {;}   //!!!!!!!!!!!!!!!!!!!!!!придумать хорошее удаление Node-ов
 private:
     void LEFT_ROTATE (Node *);
     void RIGHT_ROTATE (Node *);
@@ -50,18 +55,41 @@ public:
     bool has_key (T key);
 };
 
+template <typename T>
+    void RBtree<T>::insert(T _key){
+        Node * key = new Node(_key);
+        this->RB_INSERT(key);
+        return;
+    }
+
+template <typename T>
+    void RBtree<T>::deleting (T _key){
+        Node * key = (Node*) (this->TreeSearch(root, _key));
+        this->RB_DELETE(key);
+        delete (key);
+        return;
+    }
+
+template <typename T>
+    bool RBtree<T>::has_key (T _key){
+        Node * key = (Node*)(this->TreeSearch(root, _key));
+        return (!(key->is_NIL()));
+    }
+
 
 template <typename T >
     void RBtree<T>::LEFT_ROTATE (RBtree<T>::Node * x) {
        Node* y = x->right; //определили, с кем меняем (у был ниже х - у "поднимается")
        x->right = y->left; // х отказывается от сына х и вместо усыновил внука, левого потомка y
-       if(!y->left->is_null()) { //если внук "реальный", то он признаёт в х родителя
+       if(!y->left->is_NIL()) { //если внук "реальный", то он признаёт в х родителя
            y->left->parent = x;
        }
        y->parent = x->parent; //у уверен, что он сын отца х
                                //но один из них лишний для этого родителя
        if (x->parent->is_NIL()) {  //если родитель был нереальным, зн х был старшем в семье,
            root = y;        //тогда семья признаёт у старшим
+           Node newNil(root);
+           NIL = newNil;
        } else {
            if (x == x->parent->left) { // если х не был корнем, то у становится на место х (слева или справа от родителя)
                x->parent->left = y;
@@ -79,12 +107,14 @@ template <typename T >
        Node* y = x->left; //у - снизу справа, определили будущего бунтовщика
        x->left = y->right;  // внезапно и безпричинно х отказывается от сына: теперь х считает своим левым потомком не у, а у.right
                                 //выкинули y и всех его левых последователей из родословного древа
-       if(!y->right->is_null()) {
+       if(!y->right->is_NIL()) {
            y->right->parent = x; // если правый потомок был правоспособным, он признаёт в х синьора, подчиняется ему, предавая отца (у)
        }
        y->parent = x->parent; // у больше не считает своего отца (х) синьором, теперь он считает себя вассалом синьора икса (своего деда)
        if (x->parent->is_NIL()) {   //если тот выжил из ума (формально его не существует и всем заправлял х
            root = y;        // то у удаётся перехватить бразды правления, теперь он глава семьи
+           Node newNil(root);
+           NIL = newNil;
        } else {
            if (x == x->parent->right) { // если дед все же в здравом уме и твёрдой памяти, он понимает, что х не на своём месте
                x->parent->right = y;            //и ставит у на место х
@@ -113,6 +143,8 @@ template <typename T >
                         //либо находится в состоянии, в котором был экс - режисёр перед тем, как свихнуться (все его подопечные были уже в психушке -  дети - NIL)
         if (y.is_NIL()) {//еслли экс - режисёр всё-таки изначально был чокнутым
             root = z; //то новичёк становится режиссёром (без сравнения способностей)
+            Node newNil(root);
+            NIL = newNil;
         } else {
             if (z->key < y.key) { //иначе, сравнив способности актёра со своими,
                 y.left = z;       //шут по-справедливости определяет его в главный (правый) состав, или второй (левый)
