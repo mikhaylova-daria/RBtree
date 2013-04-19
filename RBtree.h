@@ -33,10 +33,11 @@ public:
     ~RBtree() {;}
     void LEFT_ROTATE (Node *);
     void RIGHT_ROTATE (Node *);
-    void RB_INSERT (Node *);
+    Node * RB_INSERT (Node *);
     void RB_INSERT_FIXUP (Node *);
     void RB_DELETE (Node *);
     void RB_DELETE_FIXUP (Node *);
+    Node * TreeSuccessor(Node *);
 
     void LEFT_ROTATE (Node * x) {
        Node* y = x->right; //определили, с кем меняем (у был ниже х - у "поднимается")
@@ -156,7 +157,96 @@ public:
          }
         return;
     }
+
+    Node * RB_DELETE (Node * z) {
+        Node * y;
+        Node * x;
+        if (z->left->is_NIL() || z->right->is_NIL()) {
+            y = z;
+        } else {
+            y = TreeSuccessor (z);
+        }
+        if (!(y->left->is_NIL())) {
+            x = y->left;
+        } else {
+            x = y->right;
+        }
+        x->parent = y->parent;
+        if (y->right->is_NIL()) {
+            root = x;
+        } else {
+            if (y == y ->parent->left) {
+                y->parent->left = x;
+            } else {
+                y->parent->right = x;
+            }
+        }
+        if (y != z) {
+            z->key = y->key;
+        }
+        if (y->color == true) {
+            RB_DELETE_FIXUP(x);
+        }
+        return y;
+    }
+    void RB_DELETE_FIXUP (Node * x) {
+        Node * w;
+        while ((x != root) && (x->color == true));
+        if (x == x->parent->left) {
+            w = x->parent ->right;
+            if (w->color == false) {
+                w->color = true;
+                x->parent = false;
+                LEFT_ROTATE(x->parent);
+                w = x->parent->right;
+            }
+            if ((w->left->color == true) && (w->right->color == true)) {
+                w->color = false;
+                x = x->parent;
+            } else {
+                if (w->right->color == true) {
+                    w->left->color = true;
+                    w->color = false;
+                    RIGHT_ROTATE(w);
+                    w = x->parent->right;
+                }
+                w->color = x->parent->color;
+                x->parent->color = true;
+                w->right->color = true;
+                LEFT_ROTATE(x->parent);
+                x = root;
+           }
+        } else {
+            w = x->parent ->left;
+            if (w->color == false) {
+                w->color = true;
+                x->parent = false;
+                LEFT_ROTATE(x->parent);
+                w = x->parent->left;
+            }
+            if ((w->right->color == true) && (w->left->color == true)) {
+                w->color = false;
+                x = x->parent;
+            } else {
+                if (w->left->color == true) {
+                    w->right->color = true;
+                    w->color = false;
+                    LEFT_ROTATE(w);
+                    w = x->parent->left;
+                }
+                w->color = x->parent->color;
+                x->parent->color = true;
+                w->left->color = true;
+                RIGHT_ROTATE(x->parent);
+                x = root;
+            }
+        }
+        x->color = true;
+    }
+
 };
+
+
 
 
 #endif // RBTREE_H
