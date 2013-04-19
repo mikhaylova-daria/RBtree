@@ -4,16 +4,19 @@ using namespace std;
 
 int main()
 {
-    RBtree<int> A;
-    int x;
+    RBtree< std::string > A;
+  //  int x;
     int n = 5;
+    string a;
     for (int i = 0; i < n; ++i) {
-        std::cin>>x;
-        A.insert(x);
+        std::cin>>a;
+        A.insert(a);
     }
+    //A.print();
+    //A.deleting(5);
+    A.deleting("1");
     A.print();
-    A.deleting(5);
-    A.print();
+    std::cout<<A.max_key()<< " "<<A.min_key();
     cout << "Hello World!" << endl;
     return 0;
 }

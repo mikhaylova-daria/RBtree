@@ -28,15 +28,6 @@ class RBtree
             }
         }
     };
-
-public:
-    RBtree() {
-        NIL.left = &NIL;
-        NIL.right = &NIL;
-        NIL.colour = true;
-        root = &NIL;
-    }
-    ~RBtree() {;}   //!!!!!!!!!!!!!!!!!!!!!!придумать хорошее удаление Node-ов
 private:
     void LEFT_ROTATE (Node *);
     void RIGHT_ROTATE (Node *);
@@ -51,10 +42,33 @@ private:
     void * TreeMaximum (Node *x);
     void * TreeSearch (Node * x , T key);
 public:
+    RBtree() {
+        NIL.left = &NIL;
+        NIL.right = &NIL;
+        NIL.colour = true;
+        root = &NIL;
+    }
+    ~RBtree() {
+        Node *min;
+        Node *max;
+        while (!(root->is_NIL(this))) {
+            min = (Node*)(this->TreeMinimum(root));
+            max = (Node*)(this->TreeMaximum(root));
+            delete((Node*)(this->RB_DELETE(max)));
+            delete((Node*)(this->RB_DELETE(min)));
+        }
+      }
+
     void insert(T key);
     void deleting (T key);
     bool has_key (T key);
     void print ();
+    T min_key(){
+        return ((Node*)(this->TreeMinimum(root)))->key;
+    }
+    T max_key(){
+        return ((Node*)(this->TreeMaximum(root)))->key;
+    }
 };
 
 template <typename T>
@@ -230,8 +244,11 @@ template <typename T>
         x->parent = y->parent;
         if (y->parent->is_NIL(this)) {
             root = x;
+            Node newNil(root);
+            NIL = newNil;
         } else {
-            if (y == y ->parent->left) {
+
+            if (y == (y ->parent->left)) {
                 y->parent->left = x;
             } else {
                 y->parent->right = x;
@@ -250,7 +267,7 @@ template <typename T>
 template <typename T >
     void RBtree<T>::RB_DELETE_FIXUP (RBtree<T>::Node * x) {
         Node * w;
-        while ((x != root) && (x->colour == true));
+        while ((x != root) && (x->colour == true)){
         if (x == x->parent->left) {
             w = x->parent ->right;
             if (w->colour == false) {
@@ -299,6 +316,7 @@ template <typename T >
                 RIGHT_ROTATE(x->parent);
                 x = root;
             }
+        }
         }
         x->colour = true;
     }
